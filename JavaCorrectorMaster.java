@@ -1,7 +1,5 @@
 import java.io.IOException;
 
-import javax.lang.model.element.NestingKind;
-
 public class JavaCorrectorMaster{
     public static void main(String[] args) {
 
@@ -21,31 +19,41 @@ public class JavaCorrectorMaster{
         //     System.out.println(line);
         // }
         // p.waitFor();
+        int nextJobIndex = 0;
+        do{
+            try {
+                final Job nextJob = getNextJob(nextJobIndex);
+                
+                if (nextJob == null) break;
+                
+                final String program = nextJob.getProgram();
+                final Runtime re = Runtime.getRuntime();
+                //TODO: De momento no usamos $(pwd) porque no estoy en el directorio que toca
+                //final Process command = re.exec("docker run --rm -v /home/victorponz/Documentos/repos/JavaCorrector/io:/application/io --name javacorrector victorponz/javacorrector:v0 " + program + " job" + nextJob.getJobID());
+                final Process command = re.exec("docker run --rm -v /home/victorponz/Documentos/repos/JavaCorrectorMaster/io/results:/io/results --name codetest codetest " + program + " job" + nextJob.getJobID());
+                // Wait for the application to Fin
+                command.waitFor();
+                
+            
+                if (command.exitValue()!= 0) {
+                    throw new IOException("Failed to execute jar, " );
+                }
 
-        try {
-            final Job nextJob = getNextJob();
-            final String programm = nextJob.getProgram();
-            final Runtime re = Runtime.getRuntime();
-            //TODO: De momento no usamos $(pwd) porque no estoy en el directorio que toca
-            final Process command = re.exec("docker run --rm -v /home/victorponz/Documentos/repos/JavaCorrectorMaster/salida:/application/salida -v /home/victorponz/Documentos/repos/JavaCorrectorMaster/entrada:/application --name javacorrector victorponz/javacorrector:v0 " + programm);
-
-            // Wait for the application to Fin
-            command.waitFor();
-          
-            if (command.exitValue()!= 0) {
-                throw new IOException("Failed to execute jar, " );
+            } catch (final IOException | InterruptedException e) {
+                System.out.println(e.getMessage());
             }
-
-        } catch (final IOException | InterruptedException e) {
-           System.out.println(e.getMessage());
-
-        }
+            nextJobIndex++;
+        }while(true);
         
     }
-    public static Job getNextJob() {
-        //TODO De momento lo hacemos ficticio 
-        final Job job = new Job("Afortunados");
-        return job;
+    public static Job getNextJob(int nextJobIndex) {
+        //TODO: De momento lo hacemos ficticios
+        if(nextJobIndex == 0){
+            return new Job("AlReves", 0);
+        }else if(nextJobIndex == 1){
+            return new Job("Afortunados", 1);
+        }
+        return null;
 
     }
 }
