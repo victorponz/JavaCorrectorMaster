@@ -1,5 +1,7 @@
 import java.io.IOException;
-
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 public class JavaCorrectorMaster{
     public static void main(String[] args) {
 
@@ -26,11 +28,15 @@ public class JavaCorrectorMaster{
                 
                 if (nextJob == null) break;
                 
+                
+                
                 final String program = nextJob.getProgram();
+                createDirAndCopyFiles(program, Long.toString(nextJob.getJobID()));
                 final Runtime re = Runtime.getRuntime();
                 //TODO: De momento no usamos $(pwd) porque no estoy en el directorio que toca
                 //final Process command = re.exec("docker run --rm -v /home/victorponz/Documentos/repos/JavaCorrector/io:/application/io --name javacorrector victorponz/javacorrector:v0 " + program + " job" + nextJob.getJobID());
-                final Process command = re.exec("docker run --rm -v /home/victorponz/Documentos/repos/JavaCorrectorMaster/io/results:/io/results --name codetest codetest " + program + " job" + nextJob.getJobID());
+              	System.out.println("docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program  + " " + Long.toString(nextJob.getJobID()));
+                final Process command = re.exec("docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program  + " " + Long.toString(nextJob.getJobID()));
                 // Wait for the application to Fin
                 command.waitFor();
                 
@@ -49,11 +55,28 @@ public class JavaCorrectorMaster{
     public static Job getNextJob(int nextJobIndex) {
         //TODO: De momento lo hacemos ficticios
         if(nextJobIndex == 0){
-            return new Job("AlReves", 0);
-        }else if(nextJobIndex == 1){
-            return new Job("Afortunados", 1);
+            return new Job("Afortunados", 8);
         }
         return null;
 
     }
+    private static void createDirAndCopyFiles(String className, String dirName) throws IOException{
+     	Path path = Paths.get(System.getProperty("user.dir") + "/io/" + dirName);
+        try {
+            // Create the directory
+            Files.createDirectory(path);
+            System.out.println("Directory created successfully!");
+            Path source = Paths.get(System.getProperty("user.dir") + "/" + className + ".java");
+            Path target = Paths.get(System.getProperty("user.dir") + "/io/" + dirName + "/" +  className + ".java");
+            Files.copy(source, target);
+           	
+            source = Paths.get(System.getProperty("user.dir") + "/" + className + "Test.java");
+            target = Paths.get(System.getProperty("user.dir") + "/io/" + dirName + "/" +  className + "Test.java");
+            Files.copy(source, target);
+        } catch (IOException e) {
+            // Handle the error
+            System.err.println("Failed to create directory: " + e.getMessage());
+        }
+    }
+    
 }
