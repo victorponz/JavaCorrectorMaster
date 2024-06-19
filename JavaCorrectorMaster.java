@@ -36,7 +36,7 @@ public class JavaCorrectorMaster{
                 //TODO: De momento no usamos $(pwd) porque no estoy en el directorio que toca
                 //final Process command = re.exec("docker run --rm -v /home/victorponz/Documentos/repos/JavaCorrector/io:/application/io --name javacorrector victorponz/javacorrector:v0 " + program + " job" + nextJob.getJobID());
               	System.out.println("docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program  + " " + Long.toString(nextJob.getJobID()));
-                final Process command = re.exec("docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program  + " " + Long.toString(nextJob.getJobID()));
+                final Process command = re.exec("docker run --rm -v " + System.getProperty("user.dir") + "/io:/io/ --name codetest codetest " + program  + " /io/" + Long.toString(nextJob.getJobID()));
                 // Wait for the application to Fin
                 command.waitFor();
                 
@@ -55,7 +55,7 @@ public class JavaCorrectorMaster{
     public static Job getNextJob(int nextJobIndex) {
         //TODO: De momento lo hacemos ficticios
         if(nextJobIndex == 0){
-            return new Job("Afortunados", 8);
+            return new Job("Afortunados", 9);
         }
         return null;
 
@@ -75,7 +75,7 @@ public class JavaCorrectorMaster{
             Files.copy(source, target);
         } catch (IOException e) {
             // Handle the error
-            System.err.println("Failed to create directory: " + e.getMessage());
+            System.err.println("Failed to create directory2: " + e.getMessage());
         }
     }
     
